@@ -51,5 +51,6 @@ def main():
 
         game.draw_window(NPC, Player, NPC.bullets, Player.bullets, Player.health, NPC.health)
     main()
+    
 if __name__ == "__main__":
     main()
