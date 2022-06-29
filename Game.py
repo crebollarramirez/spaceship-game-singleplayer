@@ -143,3 +143,4 @@ class AI(Spaceship):
             self.VEL = self.VEL * -1
         
         self.ship.y += self.VEL 
+
