@@ -3,7 +3,7 @@ pygame.font.init()
 pygame.mixer.init()
 
 class Game():
-    FPS = 120
+    FPS = 60
 
     # Winning Text 
     HEALTH_FONT = pygame.font.SysFont('comicsans', 40)
@@ -11,7 +11,11 @@ class Game():
 
     # Sounds
     BULLET_HIT_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'AH_SHIT.mp3'))
+    BULLET_HIT_SOUND.set_volume(0.2)
     BULLET_FIRE_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'PEW.mp3'))
+    BULLET_FIRE_SOUND.set_volume(0.2)
+
+    GAMEOVER = pygame.mixer.Sound(os.path.join('Assets', 'GAMEOVER.mp3'))
 
     # Colors
     WHITE = (255,255,255)
@@ -59,19 +63,33 @@ class Game():
         
         pygame.display.update()   
 
+    def endGame(self, NPC, Player):
+        winner_text = ""
+
+        if NPC.health <= 0:
+            winner_text = "YOU WIN!"
+        
+        if Player.health <= 0:
+            winner_text = "YOU LOST!"
+
+        if winner_text != "":
+            self.GAMEOVER.play()
+            self.draw_winner(winner_text)
+            return 1
+
 class Spaceship():
     MAX_BULLETS = 3
     health = 10
-    bullets = []
     BULLET_VEL = 7
     HIT = pygame.USEREVENT + 1
-
+    
     def __init__(self, image, game, ship_width, ship_height, velocity):
         self.game = game
         self.image = image
         self.ship_width = ship_width
         self.ship_height = ship_height
         self.VEL = velocity
+        self.bullets = []
 
         self.ship = pygame.Rect(0,0, ship_width, ship_height) # x,y,WIDTH,HEIGHT
         self.image =  pygame.transform.rotate(pygame.transform.scale(image, (self.ship_width,self.ship_height)),90)
@@ -81,13 +99,13 @@ class Spaceship():
         self.ship.y = self.game.HEIGHT//2 - self.ship.height
 
     def handle_movements(self,keys_pressed):
-        if keys_pressed[pygame.K_a] and self.ship.x - self.VEL > 0:    #left
+        if keys_pressed[pygame.K_a] and self.ship.x - self.VEL > 0:    # left
             self.ship.x -= self.VEL
-        if keys_pressed[pygame.K_d] and self.ship.x + self.VEL + self.ship.width - 20 < self.game.BORDER.x :    #right
+        if keys_pressed[pygame.K_d] and self.ship.x + self.VEL + self.ship.width - 20 < self.game.BORDER.x : # right
             self.ship.x += self.VEL
-        if keys_pressed[pygame.K_w] and self.ship.y - self.VEL > 0:    #up
+        if keys_pressed[pygame.K_w] and self.ship.y - self.VEL > 0: # up
             self.ship.y -= self.VEL
-        if keys_pressed[pygame.K_s] and self.ship.y + self.VEL + self.ship.height < self.game.HEIGHT - 15:    #down
+        if keys_pressed[pygame.K_s] and self.ship.y + self.VEL + self.ship.height < self.game.HEIGHT - 15: # down
             self.ship.y += self.VEL
     
     def handle_bullets(self, bot):
@@ -112,11 +130,16 @@ class AI(Spaceship):
     def handle_bullets(self, Player):
      for bullet in self.bullets:
         bullet.x -= self.BULLET_VEL
-        if Player.colliderect(bullet):
-            pygame.event.post(pygame.event.Event(self.HIT))
+        if Player.ship.colliderect(bullet):
+            pygame.event.post(pygame.event.Event(Player.HIT))
             self.bullets.remove(bullet)
-        elif bullet.x < 0:
-            self.remove(bullet)
+        elif bullet.x > self.game.WIDTH:
+            self.bullets.remove(bullet)
 
-    def handle_movements(self, keys_pressed):
-        pass
+    def handle_movements(self):
+        if self.ship.y > 0:
+            self.VEL = self.VEL * -1
+        if self.ship.y < self.game.HEIGHT - 15:
+            self.VEL = self.VEL * -1
+        
+        self.ship.y += self.VEL 

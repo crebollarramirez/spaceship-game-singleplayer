@@ -1,5 +1,6 @@
 import pygame, os
-from Spaceship import Spaceship, AI, Game
+import random
+from Game import Spaceship, AI, Game
 pygame.font.init()
 pygame.mixer.init()
 
@@ -10,11 +11,20 @@ def main():
     Player = Spaceship(image, game, 55, 40, 5)
 
     image = pygame.image.load(os.path.join('Assets', 'spaceship_red.png'))
-    NPC = AI(image, game, 55, 40, 5)
+    NPC = AI(image, game, 55, 40, 3)
 
     run = True
     clock = pygame.time.Clock()
     while run:
+        # RNG bullet shooting
+        rand = random.randint(0,250)
+        random.randrange
+
+        if(rand == 50):
+            bullet = pygame.Rect(NPC.ship.x + NPC.ship_width, NPC.ship.y + NPC.ship_height//2 - 2, 10, 5) 
+            NPC.bullets.append(bullet)
+            game.BULLET_FIRE_SOUND.play()
+        
         clock.tick(game.FPS)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -25,7 +35,6 @@ def main():
                     bullet = pygame.Rect(Player.ship.x + Player.ship_width, Player.ship.y + Player.ship_height//2 - 2, 10, 5) 
                     Player.bullets.append(bullet)
                     game.BULLET_FIRE_SOUND.play()
-
             if event.type == Player.HIT:
                 Player.health -= 1
                 game.BULLET_HIT_SOUND.play()
@@ -34,22 +43,17 @@ def main():
                 NPC.health -= 1
                 game.BULLET_HIT_SOUND.play()
 
-        winner_text = ""
-        if NPC.health <= 0:
-            winner_text = "YOU WIN!"
-        
-        if Player.health <= 0:
-            winner_text = "YOU LOST!"
-
-        if winner_text != "":
-            game.draw_winner(winner_text)
+        if(game.endGame(NPC, Player) == 1):
             break
         
         keys_pressed = pygame.key.get_pressed()
         Player.handle_movements(keys_pressed)
+        NPC.handle_movements()
+        NPC.handle_bullets(Player)
         Player.handle_bullets(NPC)
 
         game.draw_window(NPC, Player, NPC.bullets, Player.bullets, Player.health, NPC.health)
+
     main()
     
 if __name__ == "__main__":
