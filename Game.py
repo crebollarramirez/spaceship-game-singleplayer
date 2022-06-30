@@ -1,4 +1,5 @@
 import pygame, os
+import random
 pygame.font.init()
 pygame.mixer.init()
 
@@ -14,7 +15,6 @@ class Game():
     BULLET_HIT_SOUND.set_volume(0.2)
     BULLET_FIRE_SOUND = pygame.mixer.Sound(os.path.join('Assets', 'PEW.mp3'))
     BULLET_FIRE_SOUND.set_volume(0.2)
-
     GAMEOVER = pygame.mixer.Sound(os.path.join('Assets', 'GAMEOVER.mp3'))
 
     # Colors
@@ -50,11 +50,11 @@ class Game():
         self.WIN.blit(red_health_text, (self.WIDTH - red_health_text.get_width() - 10, 10))
         self.WIN.blit(yellow_health_text, (10, 10))
 
-
+        # adding the bot, player image to screen
         self.WIN.blit(player.image, (player.ship.x, player.ship.y))
         self.WIN.blit(bot.image, (bot.ship.x, bot.ship.y))
 
-
+        # for bullets in game
         for bullet in bot_bullets:
             pygame.draw.rect(self.WIN, self.RED, bullet)
 
@@ -68,14 +68,12 @@ class Game():
 
         if NPC.health <= 0:
             winner_text = "YOU WIN!"
-        
         if Player.health <= 0:
             winner_text = "YOU LOST!"
-
         if winner_text != "":
             self.GAMEOVER.play()
             self.draw_winner(winner_text)
-            return 1
+            return 1    # only return if there is a winner
 
 class Spaceship():
     MAX_BULLETS = 3
@@ -126,6 +124,7 @@ class AI(Spaceship):
         # Starting Location
         self.ship.x = self.game.WIDTH - self.ship.width
         self.ship.y = self.game.HEIGHT//2 - self.ship.height
+        self.VEL_X = velocity
 
     def handle_bullets(self, Player):
      for bullet in self.bullets:
@@ -136,11 +135,30 @@ class AI(Spaceship):
         elif bullet.x > self.game.WIDTH:
             self.bullets.remove(bullet)
 
-    def handle_movements(self):
+    def handle_movements(self, Player_bullets):
+        rand = random.randint(0,250)
+
+        # randomize the bot's movements
+        if(rand == 1):
+            self.VEL = self.VEL * -1
+        if(rand == 10):
+            self.VEL_X = self.VEL_X * -1      
+        if(rand == 20):
+            self.VEL_X = self.VEL_X * -1  
+        if(rand == 30):
+            self.VEL_X = self.VEL_X * -1  
+
+        # x cord
+        if self.ship.x + self.ship.width > self.game.WIDTH:
+            self.VEL_X = self.VEL_X * -1
+        if self.ship.x - self.ship.width + 50 < self.game.BORDER.x:
+            self.VEL_X = self.VEL_X * -1 
+    
+        # y cord
         if self.ship.y > 0:
             self.VEL = self.VEL * -1
-        if self.ship.y < self.game.HEIGHT - 15:
+        if self.ship.y + self.ship.height < self.game.HEIGHT - 15:
             self.VEL = self.VEL * -1
-        
-        self.ship.y += self.VEL 
 
+        self.ship.y += self.VEL
+        self.ship.x += self.VEL_X

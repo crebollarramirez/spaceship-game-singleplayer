@@ -29,7 +29,6 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-                pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and len(Player.bullets) < Player.MAX_BULLETS:
                     bullet = pygame.Rect(Player.ship.x + Player.ship_width, Player.ship.y + Player.ship_height//2 - 2, 10, 5) 
@@ -48,13 +47,12 @@ def main():
         
         keys_pressed = pygame.key.get_pressed()
         Player.handle_movements(keys_pressed)
-        NPC.handle_movements()
+        NPC.handle_movements(Player.bullets)
         NPC.handle_bullets(Player)
         Player.handle_bullets(NPC)
-
         game.draw_window(NPC, Player, NPC.bullets, Player.bullets, Player.health, NPC.health)
-
-    main()
-    
+main()
 if __name__ == "__main__":
     main()
+
+
