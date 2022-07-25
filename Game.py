@@ -31,7 +31,6 @@ class Game():
         self.WIN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         self.BORDER = pygame.Rect(self.WIDTH//2 - 5, 0, 10, self.HEIGHT)
 
-        WIN = pygame.display.set_mode((self.WIDTH, self.HEIGHT))
         pygame.display.set_caption(name)
 
     def draw_winner(self, text):
